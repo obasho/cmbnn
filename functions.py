@@ -174,7 +174,7 @@ def train_loop(num_epochs, num_train_samples, num_val_samples, nside, model_save
         # Training step
         for inputs, targets in train_dataset:
             with tf.GradientTape() as tape:
-                predictions = model(inputs, training=True)
+                predictions = model(np.expand_dims(val_inputs, axis=0), training=True)
                 loss = los(targets, predictions)
 
             gradients = tape.gradient(loss, model.trainable_variables)
