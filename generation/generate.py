@@ -99,15 +99,15 @@ def getpatches(folder, cmb_map_array,  k_list,tre):
     for r in range(6):
         fm = hp.fitsfunc.read_map(folder + f'emission_map/emission_map_0_{r}.fits')
         fmap = fm + cmb_map_array
-        mf = fmap + np.random.normal(scale=sensit[r], size=len(fmap))
+        
 
         # Step 2: Save the combined map as a FITS file
         input_map_file = f"temp_map_{r}_{tre}.fits"
-        hp.fitsfunc.write_map(input_map_file, mf)
+        hp.fitsfunc.write_map(input_map_file, fmap)
         
         # Step 3: Smooth the map
         output_smoothed_file = f"smoothed_map_{r}_{tre}.fits"
-        smoothed_map_array = smooth_healpix_map(
+        mf = smooth_healpix_map(
             infile=input_map_file,
             outfile=output_smoothed_file,
             fwhm_arcmin=fwhm[r],
@@ -117,6 +117,7 @@ def getpatches(folder, cmb_map_array,  k_list,tre):
             iter_order=iter_order,
             double_precision=double_precision
         )
+        smoothed_map_array = mf + np.random.normal(scale=sensit[r], size=len(fmap))
 
         # Step 4: Process pixels and store in arrays
         for k in k_list:
