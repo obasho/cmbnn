@@ -1,9 +1,14 @@
 
+import os
+import random
 import torch
+folder=f"/scratch/obashom.sps.iitmandi/maps/mapchunks"
 from torch.utils.data import DataLoader
+import torch
 from torch.utils.data import Dataset
 import numpy as np
 import os
+sensit=np.array([1.31,1.15,1.78,1.91,4.66,7.99])
 
 class MapChunkDataset(Dataset):
     def __init__(self, data_dir,k, transform=None):
@@ -39,10 +44,12 @@ class MapChunkDataset(Dataset):
 
 
         data_list = []
+        var_arrorig = np.load(var_path)
+        maxvar=np.max(var_arr)
         in_arr = np.load(in_path)
         for i in range(6):
             emission_arr = np.load(os.path.join(emission_folder, f'{i}.npy'))
-            var_arr = np.load(var_path)
+            var_arr=var_arrorig*(sensit[i]/maxvar)
             noise = np.random.normal(0, var_arr, size=in_arr.shape) #Gaussian noise with variance given by var_arr
             data_list.append(in_arr + emission_arr + noise)
 
@@ -60,17 +67,21 @@ class MapChunkDataset(Dataset):
         
 
 if __name__ == '__main__':
-    data_dir = "/scratch/obashom.sps.iitmandi/maps/mapchunks"  
+    # Example usage:
+    data_dir = "/scratch/obashom.sps.iitmandi/maps/mapchunks"  # Replace with your actual path
+
+    
     dataset = MapChunkDataset(data_dir,0)
 
     #Example
     first_item, out_item = dataset[0]
 
     print("Shape of the first element of dataset")
-    print(first_item.shape)  
+    print(first_item.shape)  # Should be torch.Size([6, 1024, 1024])
     print("Shape of out data")
-    print(out_item.shape)
+    print(out_item.shape) # Should be torch.Size([1024, 1024])
 
+    # You can now use this with a DataLoader to iterate over it
     
     dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
 
